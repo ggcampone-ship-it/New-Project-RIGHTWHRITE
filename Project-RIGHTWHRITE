@@ -1,0 +1,262 @@
+-- Project RIGHTWHRITE Server-Side (Fix ClipsDescendants)
+local Players = game:GetService("Players")
+local LogService = game:GetService("LogService")
+
+local function CreateProjectRW(player)
+    if player.PlayerGui:FindFirstChild("ProjectRIGHTWHRITE_SS") then return end
+
+    local sg = Instance.new("ScreenGui")
+    sg.Name = "ProjectRIGHTWHRITE_SS"
+    sg.Parent = player.PlayerGui
+    sg.ResetOnSpawn = false
+
+    -- Main Frame (Rettangolare, Nero, Contorno Rosso)
+    local Main = Instance.new("Frame")
+    Main.Name = "Main"
+    Main.Size = UDim2.new(0, 580, 0, 380)
+    Main.Position = UDim2.new(0.5, -290, 0.5, -190)
+    Main.BackgroundColor3 = Color3.new(0, 0, 0)
+    Main.BorderColor3 = Color3.new(1, 0, 0)
+    Main.BorderSizePixel = 2
+    Main.ClipsDescendants = true -- EVITA CHE IL TESTO ESCA FUORI
+    Main.Active = true
+    Main.Draggable = true 
+    Main.Parent = sg
+
+    -- Title Bar
+    local Title = Instance.new("TextLabel")
+    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.BackgroundColor3 = Color3.new(0, 0, 0)
+    Title.BorderColor3 = Color3.new(1, 0, 0)
+    Title.Text = "Project RIGHTWHRITE"
+    Title.TextColor3 = Color3.new(1, 1, 1)
+    Title.Font = Enum.Font.SourceSansBold
+    Title.TextSize = 18
+    Title.Parent = Main
+
+    -- Tasto Apri/Chiudi (- / +)
+    local MinBtn = Instance.new("TextButton")
+    MinBtn.Size = UDim2.new(0, 30, 0, 30)
+    MinBtn.Position = UDim2.new(1, -30, 0, 0)
+    MinBtn.BackgroundColor3 = Color3.new(0, 0, 0)
+    MinBtn.BorderColor3 = Color3.new(1, 0, 0)
+    MinBtn.Text = "(:"
+    MinBtn.TextColor3 = Color3.new(1, 1, 1)
+    MinBtn.Parent = Main
+
+    -- Tabs Container
+    local TabHome = Instance.new("TextButton")
+    TabHome.Size = UDim2.new(0, 80, 0, 25)
+    TabHome.Position = UDim2.new(0, 5, 0, 35)
+    TabHome.BackgroundColor3 = Color3.new(0,0,0)
+    TabHome.BorderColor3 = Color3.new(1,0,0)
+    TabHome.Text = "Home"
+    TabHome.TextColor3 = Color3.new(1,1,1)
+    TabHome.Parent = Main
+
+    local TabConsole = Instance.new("TextButton")
+    TabConsole.Size = UDim2.new(0, 80, 0, 25)
+    TabConsole.Position = UDim2.new(0, 90, 0, 35)
+    TabConsole.BackgroundColor3 = Color3.new(0,0,0)
+    TabConsole.BorderColor3 = Color3.new(1,0,0)
+    TabConsole.Text = "Console"
+    TabConsole.TextColor3 = Color3.new(1,1,1)
+    TabConsole.Parent = Main
+
+    -- PAGINA HOME
+    local HomePage = Instance.new("Frame")
+    HomePage.Size = UDim2.new(1, 0, 1, -65)
+    HomePage.Position = UDim2.new(0, 0, 0, 65)
+    HomePage.BackgroundTransparency = 1
+    HomePage.Parent = Main
+
+    -- TextBox Style Executor con ClipsDescendants
+    local ExecBox = Instance.new("TextBox")
+    ExecBox.Size = UDim2.new(0, 380, 0, 250)
+    ExecBox.Position = UDim2.new(0, 10, 0, 5)
+    ExecBox.BackgroundColor3 = Color3.new(0,0,0)
+    ExecBox.BorderColor3 = Color3.new(1,0,0)
+    ExecBox.TextColor3 = Color3.new(1,1,1)
+    ExecBox.Text = ""
+    ExecBox.PlaceholderText = "--Project RIGHTWHRITE"
+    ExecBox.MultiLine = true
+    ExecBox.ClearTextOnFocus = false
+    ExecBox.ClipsDescendants = true -- PROTEZIONE EXTRA
+    ExecBox.TextXAlignment = Enum.TextXAlignment.Left
+    ExecBox.TextYAlignment = Enum.TextYAlignment.Top
+    ExecBox.Parent = HomePage
+
+    -- Bottoni Sotto la TextBox
+    local function CreateActionBtn(txt, pos)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(0, 120, 0, 30)
+        b.Position = pos
+        b.BackgroundColor3 = Color3.new(0,0,0)
+        b.BorderColor3 = Color3.new(1,0,0)
+        b.Text = txt
+        b.TextColor3 = Color3.new(1,1,1)
+        b.Parent = HomePage
+        return b
+    end
+
+    local BExecute = CreateActionBtn("Execute", UDim2.new(0, 10, 0, 260))
+    local BClear = CreateActionBtn("Clear", UDim2.new(0, 140, 0, 260))
+    local BCopy = CreateActionBtn("Copy", UDim2.new(0, 270, 0, 260))
+
+    -- LISTA BOTTONI A DESTRA (VERTICALE)
+    local ScrollList = Instance.new("ScrollingFrame")
+    ScrollList.Size = UDim2.new(0, 160, 0, 285)
+    ScrollList.Position = UDim2.new(0, 405, 0, 5)
+    ScrollList.BackgroundColor3 = Color3.new(0,0,0)
+    ScrollList.BorderColor3 = Color3.new(1,0,0)
+    ScrollList.CanvasSize = UDim2.new(0, 0, 0, 400)
+    ScrollList.ScrollBarThickness = 4
+    ScrollList.Parent = HomePage
+
+    local listLayout = Instance.new("UIListLayout")
+    listLayout.Parent = ScrollList
+    listLayout.Padding = UDim.new(0, 5)
+
+    local function AddBtn(name, fn)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(1, -10, 0, 40)
+        b.BackgroundColor3 = Color3.new(0,0,0)
+        b.BorderColor3 = Color3.new(1,0,0)
+        b.TextColor3 = Color3.new(1,1,1)
+        b.Text = name
+        b.Parent = ScrollList
+        b.MouseButton1Click:Connect(fn)
+    end
+
+    -- AZIONI BOTTONI
+    AddBtn("Skybox", function()
+        local s = Instance.new("Sky", game.Lighting)
+        local id = "rbxassetid://90703417242017"
+        s.SkyboxBk, s.SkyboxDn, s.SkyboxFt, s.SkyboxLf, s.SkyboxRt, s.SkyboxUp = id, id, id, id, id, id
+    end)
+
+    AddBtn("Decal spam", function()
+        for _, p in pairs(workspace:GetDescendants()) do
+            if p:IsA("BasePart") then
+                for i=0,5 do
+                    local d = Instance.new("Decal", p)
+                    d.Texture = "rbxassetid://90703417242017"
+                    d.Face = Enum.NormalId:GetEnumItems()[i+1]
+                end
+            end
+        end
+    end)
+
+    AddBtn("Music", function()
+        local snd = Instance.new("Sound", workspace)
+        snd.SoundId = "rbxassetid://18974101814"
+        snd:Play()
+    end)
+
+    AddBtn("Jumpscare", function()
+        for _, plr in pairs(Players:GetPlayers()) do
+            local jg = Instance.new("ScreenGui", plr.PlayerGui)
+            local img = Instance.new("ImageLabel", jg)
+            img.Size = UDim2.new(1,0,1,0)
+            img.Image = "rbxassetid://90703417242017"
+            local s = Instance.new("Sound", workspace)
+            s.SoundId = "rbxassetid://5567540210"
+            s:Play()
+            task.delay(3, function() jg:Destroy() end)
+        end
+    end)
+
+    AddBtn("Fire", function()
+        for _, p in pairs(workspace:GetDescendants()) do
+            if p:IsA("BasePart") then Instance.new("Fire", p).Size = 30 end
+        end
+    end)
+
+    AddBtn("Enter message", function()
+        local msgs = {"I am RIGHTWHRITE", "HAHAHAAHHAHHAHA", "I am KING!!!"}
+        for _, text in pairs(msgs) do
+            local h = Instance.new("Hint", workspace)
+            h.Text = text
+            task.wait(2.5)
+            h:Destroy()
+        end
+    end)
+
+    -- PAGINA CONSOLE
+    local ConsolePage = Instance.new("Frame")
+    ConsolePage.Size = UDim2.new(1, 0, 1, -65)
+    ConsolePage.Position = UDim2.new(0, 0, 0, 65)
+    ConsolePage.BackgroundTransparency = 1
+    ConsolePage.Visible = false
+    ConsolePage.Parent = Main
+
+    local ConsoleBox = Instance.new("ScrollingFrame")
+    ConsoleBox.Size = UDim2.new(0, 380, 0, 300)
+    ConsoleBox.Position = UDim2.new(0, 10, 0, 5)
+    ConsoleBox.BackgroundColor3 = Color3.new(0,0,0)
+    ConsoleBox.BorderColor3 = Color3.new(1,0,0)
+    ConsoleBox.CanvasSize = UDim2.new(0,0,0,5000)
+    ConsoleBox.Parent = ConsolePage
+
+    Instance.new("UIListLayout", ConsoleBox)
+
+    local PlayerList = Instance.new("ScrollingFrame")
+    PlayerList.Size = UDim2.new(0, 160, 0, 300)
+    PlayerList.Position = UDim2.new(0, 405, 0, 5)
+    PlayerList.BackgroundColor3 = Color3.new(0,0,0)
+    PlayerList.BorderColor3 = Color3.new(1,0,0)
+    PlayerList.Parent = ConsolePage
+
+    Instance.new("UIListLayout", PlayerList)
+
+    -- Logica
+    LogService.MessageOut:Connect(function(msg)
+        local t = Instance.new("TextLabel", ConsoleBox)
+        t.Size = UDim2.new(1,0,0,20)
+        t.BackgroundTransparency = 1
+        t.TextColor3 = Color3.new(1,1,1)
+        t.Text = msg
+        t.TextXAlignment = Enum.TextXAlignment.Left
+    end)
+
+    local function Refresh()
+        for _, v in pairs(PlayerList:GetChildren()) do if v:IsA("TextLabel") then v:Destroy() end end
+        for _, p in pairs(Players:GetPlayers()) do
+            local l = Instance.new("TextLabel", PlayerList)
+            l.Size = UDim2.new(1,0,0,25)
+            l.BackgroundTransparency = 1
+            l.TextColor3 = Color3.new(1,1,1)
+            l.Text = p.Name
+        end
+    end
+    Players.PlayerAdded:Connect(Refresh) Players.PlayerRemoving:Connect(Refresh) Refresh()
+
+    TabHome.MouseButton1Click:Connect(function() HomePage.Visible = true ConsolePage.Visible = false end)
+    TabConsole.MouseButton1Click:Connect(function() HomePage.Visible = false ConsolePage.Visible = true end)
+
+    BClear.MouseButton1Click:Connect(function() ExecBox.Text = "" end)
+    BExecute.MouseButton1Click:Connect(function()
+        local f, err = loadstring(ExecBox.Text)
+        if f then f() else warn(err) end
+    end)
+
+    -- Funzione Contrai/Espandi
+    local isMin = false
+    MinBtn.MouseButton1Click:Connect(function()
+        isMin = not isMin
+        if isMin then
+            HomePage.Visible = false ConsolePage.Visible = false
+            TabHome.Visible = false TabConsole.Visible = false
+            Main:TweenSize(UDim2.new(0, 180, 0, 30), "Out", "Quad", 0.2, true)
+            MinBtn.Text = "):"
+        else
+            Main:TweenSize(UDim2.new(0, 580, 0, 380), "Out", "Quad", 0.2, true)
+            task.wait(0.2)
+            HomePage.Visible = true TabHome.Visible = true TabConsole.Visible = true
+            MinBtn.Text = "(:"
+        end
+    end)
+end
+
+for _, p in pairs(Players:GetPlayers()) do CreateProjectRW(p) end
+Players.PlayerAdded:Connect(CreateProjectRW)
